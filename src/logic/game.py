@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 from copy import copy
 
 import pygame as pg
@@ -11,11 +11,13 @@ class Game:
     def __init__(self):
         self.player_one: Player = Player(self, 1)
         self.player_two: Player = Player(self, 2)
+        self.players: List[Player] = [self.player_one, self.player_two]
 
         self.spots: list[Spot] = []
         self.projectiles: list[Projectile] = []
 
         self.time_to_income = consts.INCOME_PERIOD
+        self.time = 0
 
         self.controller_moves: dict[(str, Spot), Spot] = dict()
 
@@ -28,6 +30,7 @@ class Game:
         self.player_two.update()
 
         # income
+        self.time += 1
         self.time_to_income -= 1
         if self.time_to_income == 0:
             self.income_frame()
@@ -189,7 +192,7 @@ class Tower:
         if act == 1:
             return self.ask_set_target(target.tower)
         else:
-            raise ValueError(f"Unexpected number of action for standart tower: {act}")
+            raise ValueError(f"Unexpected number of order for standart tower: {act}")
 
     def income_frame(self):
         pass

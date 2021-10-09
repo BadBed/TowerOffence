@@ -1,4 +1,6 @@
-from logic.game import Tower
+from typing import Optional
+
+from logic.game import Tower, Spot
 from logic import consts
 
 
@@ -16,12 +18,22 @@ class BaseTower(Tower):
 
 
 class MiningTower(Tower):
+    # no orders
+    def ask_order(self, act: int, target: Optional[Spot] = None):
+        raise ValueError(f"No orders for mining tower")
+
+    def ask_order_type(self, act: int):
+        return Tower.OrderType.NONE
+
     # doesn't shoot
     def try_shoot(self, target: Tower):
         return False
 
     def update_target(self):
         pass
+
+    def ask_set_target(self, target: Optional['Tower']):
+        return False
 
     def shoot(self, target: Tower):
         raise NotImplementedError

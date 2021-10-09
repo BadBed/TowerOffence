@@ -23,6 +23,7 @@ class Action(Enum):
     ACCEPT = "OK"
     DECLINE = "NOK"
 
+
 class KeyboardController:
     def __init__(self, screen: pg.Surface, game: Game, player: Player):
         self.screen = screen
@@ -63,8 +64,15 @@ class KeyboardController:
                             self.sup_pointer = self.pointer.tower
                             self.sup_action_ind = ind
                         break
+                    elif action in ACTIONS_ORDER \
+                            and self.pointer.tower is not None \
+                            and self.pointer.tower.player != self.player \
+                            and action == Action.ORDER_1:
+                        for s in self.game.spots:
+                            if s.tower is not None \
+                                    and s.tower.player == self.player:
+                                s.tower.ask_set_target(self.pointer.tower)
                 else:
-                    print(action)
                     if action == Action.DECLINE:
                         self.sup_pointer = None
                         self.sup_action_ind = None
