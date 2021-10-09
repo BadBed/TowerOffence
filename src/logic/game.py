@@ -66,7 +66,7 @@ class Spot:
         if self.tower is not None:
             self.tower.update()
 
-    def ask_build_tower(self, tower_type, player: 'Player'):
+    def ask_build_tower(self, tower_type, player: 'Player', check_only=False):
         is_connected = False
         for nei in self.neighbours:
             if nei.tower is not None and nei.tower.player == player:
@@ -78,9 +78,15 @@ class Spot:
                 and self.tower is None \
                 and is_connected \
                 and player.building_cds[tower_type] == 0:
-            return self.build_tower(tower_type, player)
+            if check_only:
+                return True
+            else:
+                return self.build_tower(tower_type, player)
         else:
-            return None
+            if check_only:
+                return False
+            else:
+                return None
 
     def build_tower(self, tower_type, player: 'Player'):
         tower = self.create_tower(tower_type, player)
@@ -139,11 +145,12 @@ class Tower:
         if self.hp <= 0:
             self.die()
 
-    def ask_set_target(self, target: Optional['Tower']):
+    def ask_set_target(self, target: Optional['Tower'], check_only=False):
         if target is not None \
                 and target.player != self.player \
                 and (self.spot.pos - target.spot.pos).length() < self.ATTACK_RANGE:
-            self.target = target
+            if not check_only:
+                self.target = target
             return True
         else:
             return False
@@ -182,17 +189,20 @@ class Tower:
         UNDIR = 1
         DIR = 2
 
-    def ask_order_type(self, act: int):
+    def ask_order_type(self, act: int, check_only=True):
         if act == 1:
             return Tower.OrderType.DIR
         else:
             return Tower.OrderType.NONE
 
-    def ask_order(self, act: int, target: Optional[Spot] = None):
+    def ask_order(self, act: int, target: Optional[Spot] = None, check_only=False):
         if act == 1:
-            return self.ask_set_target(target.tower)
+            return self.ask_set_target(target.tower, check_only=check_only)
         else:
-            raise ValueError(f"Unexpected number of order for standart tower: {act}")
+            if check_only:
+                return False
+            else:
+                raise ValueError(f"Unexpected number of order for standart tower: {act}")
 
     def income_frame(self):
         pass
@@ -228,6 +238,12 @@ class Tower:
     @property
     def BUILDING_CD(self):
         raise NotImplementedError
+
+    @property
+    def NAME(self):
+        raise NotImplementedError
+
+    ORDER_NAMES = ['Set target']
 
 
 class Projectile:

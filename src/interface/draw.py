@@ -4,7 +4,7 @@ import pygame as pg
 
 from logic.game import Game, Spot, Tower, Projectile
 from logic.towers import BaseTower, ShortRangeTower, LongRangeTower, MiningTower
-from interface.control import KeyboardController
+from interface.control import KeyboardController, Action
 import interface.control as control
 from logic import consts
 
@@ -17,7 +17,7 @@ class Drawer:
         self.controllers = controllers
 
         self.big_font = pg.font.SysFont('Comic Sans MS', 30)
-        self.small_font = pg.font.SysFont('Comic Sans MS', 12)
+        self.small_font = pg.font.SysFont('Comic Sans MS', 15)
 
     def draw_game(self):
         self.draw_background()
@@ -246,7 +246,7 @@ class Drawer:
         self.screen.blit(pic_time, (500 - pic_time.get_width() // 2, 10))
 
     def draw_icons(self):
-        y_start = 680
+        y_start = 670
         x_step = 100
 
         for pid in [0, 1]:
@@ -257,24 +257,39 @@ class Drawer:
             if cnt.sup_pointer is not None:
                 self.draw_icon(
                     pg.Vector2(x_border, y_start),
-                    'Accept',
+                    'Accept', Action.ACCEPT, pid,
                     ['Accept'],
-                    is_ready=True
                 )
                 self.draw_icon(
                     pg.Vector2(x_border + x_step, y_start),
-                    'Decline',
+                    'Decline', Action.DECLINE, pid,
                     ['Decline'],
-                    is_ready=True
                 )
             elif cnt.pointer.tower is None:
-                pass
+                for i, tower_type in enumerate(player.tower_types):
+                    name: str = tower_type.NAME
+                    self.draw_icon(
+                        pg.Vector2(x_border + i * x_step, y_start),
+                        'Tower ' + name, control.ACTIONS_TOWER[i], pid,
+                        [name, str(tower_type.COST) + ' G']
+                    )
             elif cnt.pointer.tower.player == player:
-                pass
-            else:
-                pass
+                tower: Tower = cnt.pointer.tower
+                for i, ord_name in enumerate(tower.ORDER_NAMES):
+                    self.draw_icon(
+                        pg.Vector2(x_border + i*x_step, y_start),
+                        ord_name, control.ACTIONS_ORDER[i], pid,
+                        ['Choose', 'target']
+                    )
+            elif cnt.pointer.tower.player != player:
+                self.draw_icon(
+                    pg.Vector2(x_border, y_start),
+                    'Focus', Action.ORDER_1, pid,
+                    ['Focus'],
+                )
 
-    def draw_icon(self, pos: pg.Vector2, symbol: str, description: List[str], is_ready: bool):
+    def draw_icon(self, pos: pg.Vector2, sym_name: str, action: Action, pid: int,
+                  description: List[str], is_ready: bool = True):
         pos = pg.Vector2(pos)
 
         # fill back
@@ -287,35 +302,37 @@ class Drawer:
         pg.draw.rect(
             self.screen,
             fill_color,
-            pg.Rect(pos, (70, 70)),
+            pg.Rect(pos, (50, 50)),
         )
 
         # icon symbol
-        self.draw_action_sym(pos, symbol, draw_color)
+        self.draw_action_sym(pos, sym_name, draw_color)
 
         # icon frame
         pg.draw.rect(
             self.screen,
             draw_color,
-            pg.Rect(pos, (70, 70)),
+            pg.Rect(pos, (50, 50)),
             3
         )
 
         # description below
-        text = '\n'.join(description)
-        text_pic = self.small_font.render(
-            text,
-            False,
-            pg.Color(250, 250, 250)  # white
-        )
-        self.screen.blit(
-            text_pic,
-            pos + pg.Vector2(0, 80)
-        )
+        button_name = self.BUTTON_NAMES[self.get_action_button(action, pid)]
+        full_description = [button_name] + description
+        for i, line in enumerate(full_description):
+            text_pic = self.small_font.render(
+                full_description[i],
+                False,
+                pg.Color(250, 250, 250)  # white
+            )
+            self.screen.blit(
+                text_pic,
+                pg.Rect(pos + pg.Vector2(0, 55 + i*20), (50, 20))
+            )
 
     @staticmethod
-    def get_action_button(action: control.Action, pid: int):
-        keys_dict = control.BUTTONS_BY_PLAYER[pid-1]
+    def get_action_button(action: Action, pid: int):
+        keys_dict = control.BUTTONS_BY_PLAYER[pid+1]
 
         for key in keys_dict:
             if action in keys_dict[key]:
@@ -328,26 +345,90 @@ class Drawer:
                 self.screen,
                 color,
                 pos + pg.Vector2(10, 10),
-                pos + pg.Vector2(35, 60),
+                pos + pg.Vector2(25, 40),
+                width=2
             )
             pg.draw.line(
                 self.screen,
                 color,
-                pos + pg.Vector2(60, 10),
-                pos + pg.Vector2(35, 60),
+                pos + pg.Vector2(40, 10),
+                pos + pg.Vector2(25, 40),
+                width=2
             )
         elif name == 'Decline':
             pg.draw.line(
                 self.screen,
                 color,
                 pos + pg.Vector2(10, 10),
-                pos + pg.Vector2(60, 60),
+                pos + pg.Vector2(40, 40),
+                width=2
             )
             pg.draw.line(
                 self.screen,
                 color,
-                pos + pg.Vector2(60, 10),
-                pos + pg.Vector2(10, 60),
+                pos + pg.Vector2(40, 10),
+                pos + pg.Vector2(10, 40),
+                width=2
+            )
+        elif name == 'Focus' or name == 'Set target':
+            pg.draw.circle(
+                self.screen,
+                color,
+                pos + pg.Vector2(25, 25),
+                radius=10,
+                width=1,
+            )
+            pg.draw.line(
+                self.screen,
+                color,
+                pos + pg.Vector2(25, 10),
+                pos + pg.Vector2(25, 40),
+                width=1
+            )
+            pg.draw.line(
+                self.screen,
+                color,
+                pos + pg.Vector2(10, 25),
+                pos + pg.Vector2(40, 25),
+                width=1
+            )
+        elif name == 'Tower Mining':
+            pg.draw.circle(
+                self.screen,
+                color,
+                pos + pg.Vector2(25, 25),
+                radius=10,
+                width=2,
+            )
+            pg.draw.line(
+                self.screen,
+                color,
+                pos + pg.Vector2(25, 15),
+                pos + pg.Vector2(25, 35),
+                width=2
+            )
+        elif name == 'Tower Long range':
+            pg.draw.line(
+                self.screen,
+                color,
+                pos + pg.Vector2(25, 10),
+                pos + pg.Vector2(25, 40),
+                width=2
+            )
+        elif name == 'Tower Short range':
+            pg.draw.line(
+                self.screen,
+                color,
+                pos + pg.Vector2(15, 15),
+                pos + pg.Vector2(35, 35),
+                width=2
+            )
+            pg.draw.line(
+                self.screen,
+                color,
+                pos + pg.Vector2(35, 15),
+                pos + pg.Vector2(15, 35),
+                width=2
             )
         else:
             raise RuntimeError(f"Unknown action name: {name}")

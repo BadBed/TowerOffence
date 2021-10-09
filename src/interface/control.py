@@ -87,12 +87,12 @@ class KeyboardController:
 ACTIONS_MOVE = {
     Action.MOVE_UP, Action.MOVE_DOWN, Action.MOVE_LEFT, Action.MOVE_RIGHT
 }
-ACTIONS_TOWER = {
+ACTIONS_TOWER = [
     Action.TOWER_1, Action.TOWER_2, Action.TOWER_3
-}
-ACTIONS_ORDER = {
+]
+ACTIONS_ORDER = [
     Action.ORDER_1, Action.ORDER_2, Action.ORDER_3
-}
+]
 ACTION_INDICES = {
     Action.TOWER_1: 1, Action.TOWER_2: 2, Action.TOWER_3: 3,
     Action.ORDER_1: 1, Action.ORDER_2: 2, Action.ORDER_3: 3

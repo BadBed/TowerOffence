@@ -16,13 +16,18 @@ class BaseTower(Tower):
     BUILDING_CD = 420
     BUILDING_TIME = 0
 
+    NAME = 'Base'
+
 
 class MiningTower(Tower):
     # no orders
-    def ask_order(self, act: int, target: Optional[Spot] = None):
-        raise ValueError(f"No orders for mining tower")
+    def ask_order(self, act: int, target: Optional[Spot] = None, check_only=False):
+        if check_only:
+            return False
+        else:
+            raise ValueError(f"No orders for mining tower")
 
-    def ask_order_type(self, act: int):
+    def ask_order_type(self, act: int, check_only=True):
         return Tower.OrderType.NONE
 
     # doesn't shoot
@@ -32,7 +37,7 @@ class MiningTower(Tower):
     def update_target(self):
         pass
 
-    def ask_set_target(self, target: Optional['Tower']):
+    def ask_set_target(self, target: Optional['Tower'], check_only=False):
         return False
 
     def shoot(self, target: Tower):
@@ -54,6 +59,9 @@ class MiningTower(Tower):
     ATTACK_RANGE = None
     PROJECTILE_SPEED = None
 
+    NAME = 'Mining'
+    ORDER_NAMES = []
+
 
 class LongRangeTower(Tower):
     MAX_HP = 3000
@@ -65,6 +73,8 @@ class LongRangeTower(Tower):
     BUILDING_TIME = 0
     BUILDING_CD = 420
 
+    NAME = 'Long range'
+
 
 class ShortRangeTower(Tower):
     MAX_HP = 4000
@@ -75,3 +85,5 @@ class ShortRangeTower(Tower):
     PROJECTILE_SPEED = 4.0
     BUILDING_TIME = 0
     BUILDING_CD = 420
+
+    NAME = 'Short range'
