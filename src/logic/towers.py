@@ -7,7 +7,7 @@ from logic import consts
 # TODO: lose if die
 # TODO: provide electricity
 class BaseTower(Tower):
-    MAX_HP = 6000
+    MAX_HP = 12000
     COST = 700
     ATTACK_CD = 20
     ATTACK_DAMAGE = 100
@@ -47,12 +47,12 @@ class MiningTower(Tower):
     def income_frame(self):
         self.player.money += self.INCOME
 
-    MAX_HP = 3000
+    MAX_HP = 6000
     COST = 300
     BUILDING_TIME = 0
     BUILDING_CD = 1800
 
-    INCOME = 10
+    INCOME = 5
 
     ATTACK_CD = None
     ATTACK_DAMAGE = None
@@ -64,26 +64,26 @@ class MiningTower(Tower):
 
 
 class LongRangeTower(Tower):
-    MAX_HP = 3000
+    MAX_HP = 6000
     COST = 200
     ATTACK_CD = 20
     ATTACK_DAMAGE = 100
     ATTACK_RANGE = consts.RANGE_LONG
     PROJECTILE_SPEED = 4.0
     BUILDING_TIME = 0
-    BUILDING_CD = 420
+    BUILDING_CD = 300
 
     NAME = 'Long range'
 
 
 class ShortRangeTower(Tower):
-    MAX_HP = 4000
+    MAX_HP = 8000
     COST = 300
     ATTACK_CD = 40
     ATTACK_DAMAGE = 300
     ATTACK_RANGE = consts.RANGE_SHORT
     PROJECTILE_SPEED = 4.0
     BUILDING_TIME = 0
-    BUILDING_CD = 420
+    BUILDING_CD = 300
 
     NAME = 'Short range'
